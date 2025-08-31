@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restaurant Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f6fa;
+        }
+
+        #chartForm {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        #restaurant_select {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 25px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        #loading {
+            display: none;
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .error {
+            color: #e74c3c;
+            padding: 15px;
+            margin: 20px 0;
+            background: #fdedec;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 992px) {
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            #chartForm {
+                flex-direction: column;
+            }
+            
+            .chart-wrapper {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: #2c3e50; margin-bottom: 30px;">Restaurant Performance Dashboard</h1>
+    
+    <form id="chartForm">
+        <select name="business_id" id="restaurant_select">
+            {% for name, stars, review_count, business_id in restaurants %}
+                <option value="{{ business_id }}">
+                    {{ name }} (★{{ stars }} • 📝{{ review_count }})
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit">Generate Report</button>
+    </form>
+    
+    <div id="loading">📊 Analyzing performance data...</div>
+    <div id="chartsContainer" class="charts-grid"></div>
+
+    <script>
+        document.getElementById('chartForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loading = document.getElementById('loading');
+            const container = document.getElementById('chartsContainer');
+            const select = document.getElementById('restaurant_select');
+            const businessId = select.value;
+            
+            container.innerHTML = '';
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('/charts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ business_id: businessId })
+                });
+
+                if (!response.ok) throw new Error(`Server error: ${response.status}`);
+                const data = await response.json();
+                
+                const restaurantName = select.options[select.selectedIndex].text.split(' (')[0];
+                document.querySelector('h1').textContent = `${restaurantName} Performance Dashboard`;
+                
+                Object.entries(data.avg_scores).forEach(([aspect, scores], index) => {
+                    const chartId = `chart-${aspect}-${Date.now()}`;
+                    const containerDiv = document.createElement('div');
+                    containerDiv.className = 'chart-container';
+                    containerDiv.innerHTML = `
+                        <div class="chart-title">${aspect.replace(/_/g, ' ').toUpperCase()}</div>
+                        <div class="chart-wrapper">
+                            <canvas id="${chartId}"></canvas>
+                        </div>
+                    `;
+                    container.appendChild(containerDiv);
+
+                    const ctx = document.getElementById(chartId).getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.years,
+                            datasets: [{
+                                label: 'Average Score',
+                                data: scores,
+                                backgroundColor: this.createGradient(ctx, '#4CAF50', '#45a049'),
+                                borderColor: 'rgba(255,255,255,0.8)',
+                                borderWidth: 2,
+                                borderRadius: 5,
+                                hoverBackgroundColor: '#388e3c'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    backgroundColor: 'rgba(0,0,0,0.8)',
+                                    bodyFont: { size: 14 },
+                                    titleFont: { size: 16 }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Score',
+                                        color: '#7f8c8d',
+                                        font: { weight: 'bold' }
+                                    },
+                                    grid: { color: '#ecf0f1' },
+                                    ticks: { color: '#95a5a6' }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Year',
+                                        color: '#7f8c8d',
+                                        font: { weight: 'bold' }
+                                    },
+                                    grid: { display: false },
+                                    ticks: { 
+                                        color: '#95a5a6',
+                                        autoSkip: true,
+                                        maxTicksLimit: 8 
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = `
+                    <div class="error">
+                        ⚠️ Error: ${error.message}
+                    </div>
+                `;
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        function createGradient(ctx, color1, color2) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, color1);
+            gradient.addColorStop(1, color2);
+            return gradient;
+        }
+    </script>
+</body>
+</html>
