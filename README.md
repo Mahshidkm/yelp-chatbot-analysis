@@ -47,7 +47,61 @@ This project implements a multi-model NLP pipeline:
 1.  **Aspect Extraction & Sentiment Scoring:** We used facebook/bart-large-mnli for Aspect Extraction 
 and yangheng/deberta-v3-base-absa-v1.1 for Sentiment Scoring
 
-
 2.  **Conversational Chatbot:** We used HuggingFaceH4/zephyr-7b-beta 
 
+---
+
+## Project Structure
+
+The project is organized as follows:
+
+```
+my_project/
+├── data/                 # Raw and processed data files (raw not included)
+├── job/                  # Slurm job scripts for cluster execution
+├── app/                  # Flask application code
+│   ├── templates/        # HTML templates for web pages
+│   ├── model/            # Chatbot model implementation
+│   ├── routes.py         # Flask route definitions
+│   └── services.py       # Data processing services
+├── src/                  # Additional source code
+└── run.py                # Application entry point
+```     
+
+## How It Works / Methodology
+
+1.  **Data Acquisition:** The pipeline begins with the [Yelp Open Dataset](https://www.yelp.com/dataset). Due to its size, it is not stored in this repository.
+2.  **Aspect-Based Sentiment Analysis (ABSA):**
+
+    a. **Submit the ABSA Slurm Job:** Submit the `extract_aspect_and_sentiment_job.sh` script to perform aspect-based sentiment analysis on the cleaned restaurant reviews. This script will likely train or load an ABSA model and apply it to the reviews to extract aspects and determine sentiment.
+
+    ```bash
+    sbatch job/extract_aspect_and_sentiment_job.sh
+    ```
+
+    *Important:* The `extract_aspect_and_sentiment_job.sh` script should:
+
+    *   Load the cleaned restaurant reviews data.
+    *   Initialize the ABSA model.
+    *   Apply the ABSA model to the reviews.
+    *   Save the processed data (with aspect and sentiment information) to `data/processed/yelp.csv`.
+
+3.  **Chatbot and Flask Application:**
+
+    a. **Submit the Chatbot Slurm Job:** Submit the `chat_bot_job.sh` script to run the Flask application with the chatbot interface. This script will likely load the processed data (`data/processed/yelp.csv`) and start the Flask web server.
+
+    ```bash
+    sbatch job/chat_bot_job.sh
+    ```
+
+    *Important:* The `chat_bot_job.sh` script should:
+
+    *   Load the processed data (`data/processed/yelp.csv`).
+    *   Initialize the chatbot.
+    *   Start the Flask web server.
+
+4.  **Accessing the Web Application:**
+
+    *   Once the `chat_bot_job.sh` Slurm job is running, the Flask application will be accessible at the address specified in the `chat_bot_job.sh` script (e.g., `http://your_server_address:5000`).
+    *   Open a web browser and navigate to the specified address to interact with the chatbot and view the dashboards.
 
