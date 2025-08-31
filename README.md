@@ -58,6 +58,9 @@ The project is organized as follows:
 ```
 my_project/
 ├── data/                 # Raw and processed data files (raw not included)
+│   ├── raw/       
+│   ├── processed/           
+│   ├── cleaned/
 ├── job/                  # Slurm job scripts for cluster execution
 ├── app/                  # Flask application code
 │   ├── templates/        # HTML templates for web pages
