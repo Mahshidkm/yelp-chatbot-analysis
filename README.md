@@ -5,8 +5,8 @@
 This project is a full-stack data science application that transforms raw Yelp reviews into actionable business intelligence and a personalized customer recommendation system. It leverages state-of-the-art NLP models to perform granular **Aspect-Based Sentiment Analysis (ABSA)**, providing deep insights into what customers truly think about specific aspects (food quality, service, atmosphere, etc.) of a restaurant. These insights are presented through two intuitive dashboards: one for **restaurant owners** to track their performance and one for **customers** to find their perfect meal through a conversational chatbot.
 
 ## 🚀 Video Demo
-
-**Video Demo:** [https://drive.google.com/file/d/1Rxg51X7yeJSkk0jKLuypIA4AXTLC81bM/view?usp=sharing]()  
+  
+**Video Demo:** https://drive.google.com/file/d/1Rxg51X7yeJSkk0jKLuypIA4AXTLC81bM/view?usp=sharing
 
 ---
 
