@@ -1,0 +1,31 @@
+# Ignore the raw data folder - it's too big for GitHub
+data/
+
+# Ignore any large processed data files
+*.parquet
+*.json
+
+# Python ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+.env.local
+.env.production
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
