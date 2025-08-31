@@ -6,7 +6,7 @@ This project is a full-stack data science application that transforms raw Yelp r
 
 ## 🚀 Video Demo
 
-**Video Demo:** [Demo Link on Vercel/Railway]()  
+**Video Demo:** [https://drive.google.com/file/d/1Rxg51X7yeJSkk0jKLuypIA4AXTLC81bM/view?usp=sharing]()  
 
 ---
 
